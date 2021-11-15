@@ -1,0 +1,31 @@
+{
+  "name": "topsoft4u/openapi-generator",
+  "version": "1.0.0",
+  "homepage": "https://topsoft4u.com",
+  "keywords": [
+    "openapi",
+    "generator",
+    "phpdocs"
+  ],
+  "description": "Generates OpenAPI documentation from controllers and models in your PHP project (uses native PHP typing + php docs)",
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "TopSoft4U\\OpenAPI\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Łukasz Kolasa",
+      "homepage": "https://topsoft4u.com",
+      "email": "lukasz.kolasa@topsoft4u.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "topsoft4u/php-doc-parser": ">=1.0.5",
+    "ext-json": "*",
+    "ext-mbstring": "*"
+  }
+}
