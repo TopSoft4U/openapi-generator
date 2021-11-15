@@ -1,8 +1,8 @@
 <?php
 
-namespace OpenAPI;
+namespace TopSoft4U\OpenAPI;
 
-use OpenAPI\Schema\OpenAPIBaseSchema;
+use TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema;
 
 class OpenAPIGenericError
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace OpenAPI\Parameters;
+namespace TopSoft4U\OpenAPI\Parameters;
 
-use OpenAPI\OpenAPIContent;
+use TopSoft4U\OpenAPI\OpenAPIContent;
 use ReflectionParameter;
 
 class OpenAPIBodyParameter extends OpenAPIBaseParameter

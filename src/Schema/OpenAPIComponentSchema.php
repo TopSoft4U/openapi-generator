@@ -1,8 +1,8 @@
 <?php
 
-namespace OpenAPI\Schema;
+namespace TopSoft4U\OpenAPI\Schema;
 
-use OpenAPI\OpenAPIDocument;
+use TopSoft4U\OpenAPI\OpenAPIDocument;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
@@ -11,7 +11,7 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
 {
     /** @var string[] */
     private array $required = [];
-    /** @var \OpenAPI\Schema\OpenAPISchemaTyped[] */
+    /** @var \TopSoft4U\OpenAPI\Schema\OpenAPISchemaTyped[] */
     private array $properties = [];
     private bool $additionalProperties = false;
 

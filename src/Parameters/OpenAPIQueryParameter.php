@@ -1,11 +1,11 @@
 <?php
 
-namespace OpenAPI\Parameters;
+namespace TopSoft4U\OpenAPI\Parameters;
 
 use Exception;
-use OpenAPI\OpenAPIDocument;
-use OpenAPI\Schema\OpenAPISchemaRef;
-use OpenAPI\Schema\OpenAPISchemaTyped;
+use TopSoft4U\OpenAPI\OpenAPIDocument;
+use TopSoft4U\OpenAPI\Schema\OpenAPISchemaRef;
+use TopSoft4U\OpenAPI\Schema\OpenAPISchemaTyped;
 use ReflectionParameter;
 
 class OpenAPIQueryParameter extends OpenAPIBaseParameter

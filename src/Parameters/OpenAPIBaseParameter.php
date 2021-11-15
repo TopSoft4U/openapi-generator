@@ -1,9 +1,9 @@
 <?php
 
-namespace OpenAPI\Parameters;
+namespace TopSoft4U\OpenAPI\Parameters;
 
 use JsonSerializable;
-use OpenAPI\Schema\OpenAPIBaseSchema;
+use TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema;
 use ReflectionParameter;
 
 abstract class OpenAPIBaseParameter implements JsonSerializable

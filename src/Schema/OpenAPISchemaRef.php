@@ -1,11 +1,14 @@
 <?php
 
-namespace OpenAPI\Schema;
+namespace TopSoft4U\OpenAPI\Schema;
 
-use OpenAPI\OpenAPIDocument;
+use TopSoft4U\OpenAPI\OpenAPIDocument;
 
 class OpenAPISchemaRef extends OpenAPIBaseSchema
 {
+    /**
+     * @throws \ReflectionException
+     */
     public function __construct($typeName, ?string $childTypeName = null)
     {
         parent::__construct($typeName);

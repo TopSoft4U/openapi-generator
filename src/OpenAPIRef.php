@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAPI;
+namespace TopSoft4U\OpenAPI;
 
 use JsonSerializable;
 

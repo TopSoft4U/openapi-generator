@@ -1,11 +1,11 @@
 <?php
 
-namespace OpenAPI;
+namespace TopSoft4U\OpenAPI;
 
 use JsonSerializable;
-use OpenAPI\Parameters\OpenAPIBodyParameter;
-use OpenAPI\Parameters\OpenAPIQueryParameter;
-use OpenAPI\Schema\OpenAPIBaseSchema;
+use TopSoft4U\OpenAPI\Parameters\OpenAPIBodyParameter;
+use TopSoft4U\OpenAPI\Parameters\OpenAPIQueryParameter;
+use TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema;
 use ReflectionClass;
 use ReflectionMethod;
 use Throwable;

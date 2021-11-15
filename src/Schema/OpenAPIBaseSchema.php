@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAPI\Schema;
+namespace TopSoft4U\OpenAPI\Schema;
 
 use JsonSerializable;
 use ReflectionNamedType;
@@ -24,6 +24,9 @@ abstract class OpenAPIBaseSchema implements JsonSerializable
         return end($parts);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public static function ExtractFromType(ReflectionType $type, ?string $extraType = null): OpenAPIBaseSchema
     {
         assert($type instanceof ReflectionNamedType);
@@ -40,6 +43,9 @@ abstract class OpenAPIBaseSchema implements JsonSerializable
         return $schema;
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public static function ExtractFromTypeName(string $type, ?string $extraType = null): OpenAPIBaseSchema
     {
         if (IsBuiltin($type)) {

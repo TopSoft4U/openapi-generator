@@ -1,9 +1,9 @@
 <?php
 
-namespace OpenAPI;
+namespace TopSoft4U\OpenAPI;
 
 use JsonSerializable;
-use OpenAPI\Schema\OpenAPIBaseSchema;
+use TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema;
 
 class OpenAPIContent implements JsonSerializable
 {

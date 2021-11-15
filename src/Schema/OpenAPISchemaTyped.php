@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAPI\Schema;
+namespace TopSoft4U\OpenAPI\Schema;
 
 class OpenAPISchemaTyped extends OpenAPIBaseSchema
 {

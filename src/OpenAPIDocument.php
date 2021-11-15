@@ -1,11 +1,11 @@
 <?php
 
-namespace OpenAPI;
+namespace TopSoft4U\OpenAPI;
 
 use Exception;
 use JsonSerializable;
-use OpenAPI\Schema\OpenAPIComponentSchema;
-use OpenAPI\Security\OpenAPISecurity;
+use TopSoft4U\OpenAPI\Schema\OpenAPIComponentSchema;
+use TopSoft4U\OpenAPI\Security\OpenAPISecurity;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -31,7 +31,7 @@ class OpenAPIDocument implements JsonSerializable
     private array $paths = [];
     private array $components = [];
 
-    /** @var \OpenAPI\Schema\OpenAPIComponentSchema[] */
+    /** @var \TopSoft4U\OpenAPI\Schema\OpenAPIComponentSchema[] */
     private array $schemas = [];
 
 
