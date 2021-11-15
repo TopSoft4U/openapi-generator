@@ -51,5 +51,7 @@ $codeMessages = [
 function ResponseCodeDescription(int $code): string
 {
     global $codeMessages;
-    return $codeMessages[$code] ?? "Error $code";
+
+    $prefix = $code >= 400 ? "Error" : "Status";
+    return $codeMessages[$code] ?? "$prefix $code";
 }

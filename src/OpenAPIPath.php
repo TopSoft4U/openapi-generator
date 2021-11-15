@@ -72,8 +72,10 @@ class OpenAPIPath implements JsonSerializable
         $docs = PHPParseDoc($method->getDocComment());
         $returnType = $method->getReturnType();
 
-        $response = new OpenAPIResponse($returnType ? 200 : 204);
-        $response->description = $docs->return->description ?? ResponseCodeDescription(200);
+        $statusCode = $returnType ? 200 : 204;
+
+        $response = new OpenAPIResponse($statusCode);
+        $response->description = $docs->return->description ?? ResponseCodeDescription($statusCode);
 
         if ($returnType || isset($docs->return->type)) {
             $schema = OpenAPIBaseSchema::ExtractFromType($returnType, $docs->return->type ?? null);
