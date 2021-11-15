@@ -23,7 +23,7 @@ abstract class OpenAPIBaseParameter implements JsonSerializable
 
         $methodDocParse = PHPParseDoc($parameter->getDeclaringFunction()->getDocComment());
 
-        $paramDoc = $methodDocParse->params[$name];
+        $paramDoc = @$methodDocParse->params[$name];
 
         $this->description = $paramDoc->description ?? null;
         $this->required = !$parameter->allowsNull();
