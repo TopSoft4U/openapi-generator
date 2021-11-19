@@ -34,7 +34,12 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
         if (OpenAPIDocument::getInstance()->useInheritance) {
             while ($class = new ReflectionClass($typeName)) {
                 $parentClass = $class->getParentClass();
-                if (!$parentClass || $parentClass->isInternal() || $parentClass->getName() == "_API_JSON") {
+                if (!$parentClass) {
+                    break;
+                }
+
+                $ignored = in_array($parentClass->getName(), OpenAPIDocument::getInstance()->ignoreParentClasses);
+                if ($parentClass->isInternal() || $ignored) {
                     break;
                 }
 

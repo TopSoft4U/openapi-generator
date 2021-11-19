@@ -83,9 +83,13 @@ class OpenAPISchemaTyped extends OpenAPIBaseSchema
         if ($this->format) {
             $result["format"] = $this->format;
         }
+
         if ($this->items) {
             $result["items"] = $this->items;
+        } else if ($this->type == "array") {
+            $result["items"] = (object) null;
         }
+
         if ($this->nullable) {
             $result["nullable"] = $this->nullable;
         }

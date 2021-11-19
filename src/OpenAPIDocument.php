@@ -22,6 +22,9 @@ class OpenAPIDocument implements JsonSerializable
 
     public bool $useInheritance = true;
 
+    /** @var string[] Fully qualified class names with namespaces */
+    public array $ignoreParentClasses = [];
+
     /** @var OpenAPIGenericError[] */
     public array $genericErrors = [];
 
@@ -33,7 +36,6 @@ class OpenAPIDocument implements JsonSerializable
 
     /** @var \TopSoft4U\OpenAPI\Schema\OpenAPIComponentSchema[] */
     private array $schemas = [];
-
 
     public static function getInstance(): OpenAPIDocument
     {
