@@ -84,6 +84,13 @@ class OpenAPIPath implements JsonSerializable
 
         $this->addResponse($response);
 
+        if ($returnType && $returnType->allowsNull()) {
+            $statusCode = 204;
+            $response = new OpenAPIResponse($statusCode);
+            $response->description = ResponseCodeDescription($statusCode);
+            $this->addResponse($response);
+        }
+
         foreach ($docs->throws as $throw) {
             $excClassName = $throw->type;
 
