@@ -8,9 +8,12 @@ class OpenAPISchemaTyped extends OpenAPIBaseSchema
     private ?string $format = null;
     protected bool $nullable = false;
 
+    /** @var \TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema|bool|null */
+    private $additionalProperties = null;
+
     public ?OpenAPIBaseSchema $items = null;
 
-    public function __construct($typeName)
+    public function __construct(string $typeName, array $genericArgs = [])
     {
         parent::__construct($typeName);
 
@@ -35,11 +38,18 @@ class OpenAPISchemaTyped extends OpenAPIBaseSchema
 
         switch ($typeName) {
             case "array":
-                $this->type = "array";
+                if (count($genericArgs) == 2) {
+                    $this->type = "object";
+                    $this->default = (object) [];
+                    [, $valueType] = $genericArgs;
+                    $this->additionalProperties = OpenAPIBaseSchema::ExtractFromTypeName($valueType);
+                } else {
+                    $this->type = "array";
 
-                if ($extraClass) {
-                    $schema = OpenAPIBaseSchema::ExtractFromTypeName($extraClass);
-                    $this->items = $schema;
+                    if ($extraClass) {
+                        $schema = OpenAPIBaseSchema::ExtractFromTypeName($extraClass);
+                        $this->items = $schema;
+                    }
                 }
                 break;
             case "bool":
@@ -69,9 +79,18 @@ class OpenAPISchemaTyped extends OpenAPIBaseSchema
             case "NULL":
                 $this->type = "null";
                 break;
-            default:
             case "object":
                 $this->type = "object";
+                if ($genericArgs) {
+                    [, $valueType] = $genericArgs;
+                    $this->additionalProperties = OpenAPIBaseSchema::ExtractFromTypeName($valueType);
+                } else {
+                    $this->additionalProperties = true;
+                }
+                break;
+            default:
+                $this->type = "object";
+                $this->additionalProperties = false;
                 break;
         }
     }
@@ -95,6 +114,10 @@ class OpenAPISchemaTyped extends OpenAPIBaseSchema
         }
         if (isset($this->default)) {
             $result["default"] = $this->default;
+        }
+
+        if (isset($this->additionalProperties)) {
+            $result["additionalProperties"] = $this->additionalProperties;
         }
 
         return $result;

@@ -27,12 +27,12 @@ abstract class OpenAPIBaseSchema implements JsonSerializable
     /**
      * @throws \ReflectionException
      */
-    public static function ExtractFromType(ReflectionType $type, ?string $extraType = null): OpenAPIBaseSchema
+    public static function ExtractFromType(ReflectionType $type, ?string $extraType = null, array $genericArgs = []): OpenAPIBaseSchema
     {
         assert($type instanceof ReflectionNamedType);
 
         if ($type->isBuiltin() || $type->getName() == "DateTime") {
-            $schema = new OpenAPISchemaTyped($extraType ?: $type->getName());
+            $schema = new OpenAPISchemaTyped($extraType ?: $type->getName(), $genericArgs);
             $schema->nullable = $type->allowsNull();
         } else {
             $schema = new OpenAPISchemaRef($type->getName());

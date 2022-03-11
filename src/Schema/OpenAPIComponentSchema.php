@@ -13,7 +13,6 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
     private array $required = [];
     /** @var \TopSoft4U\OpenAPI\Schema\OpenAPISchemaTyped[] */
     private array $properties = [];
-    private bool $additionalProperties = false;
 
     /** @var string[] */
     private array $inheritedBy = [];
@@ -82,7 +81,7 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
             }
 
             $docs = PHPParseDoc($prop->getDocComment());
-            $newProp = OpenAPIBaseSchema::ExtractFromType($propType, $docs->var->type ?? null);
+            $newProp = OpenAPIBaseSchema::ExtractFromType($propType, $docs->var->type ?? null, $docs->var->genericArgs ?? []);
 
             $propDocParse = PHPParseDoc($prop->getDocComment());
             if (isset($propDocParse->description)) {
@@ -101,7 +100,9 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
                 continue;
             }
 
-            $this->properties[$key]->default = $value;
+            if (!isset($this->properties[$key]->default)) {
+                $this->properties[$key]->default = $value;
+            }
         }
     }
 
@@ -121,8 +122,6 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
         if (isset($this->default)) {
             $result["default"] = $this->default;
         }
-
-        $result["additionalProperties"] = $this->additionalProperties;
 
         if ($this->inheritedBy) {
             $result["discriminator"]["propertyName"] = "type";
