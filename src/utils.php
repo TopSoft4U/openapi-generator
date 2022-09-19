@@ -16,6 +16,7 @@ function IsBuiltin(string $type): bool
 
 $codeMessages = [
     200 => "OK",
+    204 => "Empty",
     400 => "Bad Request",
     401 => "Unauthorized",
     402 => "Payment Required ",

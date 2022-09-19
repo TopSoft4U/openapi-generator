@@ -5,7 +5,7 @@ namespace TopSoft4U\OpenAPI\Schema;
 class OpenAPISchemaTyped extends OpenAPIBaseSchema
 {
     public string $type;
-    private ?string $format = null;
+    public ?string $format = null;
     protected bool $nullable = false;
 
     /** @var \TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema|bool|null */
@@ -51,6 +51,10 @@ class OpenAPISchemaTyped extends OpenAPIBaseSchema
                         $this->items = $schema;
                     }
                 }
+                break;
+            case "binary":
+                $this->type = "string";
+                $this->format = "binary";
                 break;
             case "bool":
             case "boolean":

@@ -9,6 +9,7 @@ use TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema;
 use ReflectionClass;
 use ReflectionMethod;
 use Throwable;
+use TopSoft4U\OpenAPI\Schema\OpenAPISchemaTyped;
 
 class OpenAPIPath implements JsonSerializable
 {
@@ -121,11 +122,28 @@ class OpenAPIPath implements JsonSerializable
             $error->description = ResponseCodeDescription($genericError->code);
             $this->addResponse($error);
         }
+
+        foreach ($docs->custom as $customPHPDocNode) {
+            if ($customPHPDocNode->tagName === "@OpenAPICustomResponse") {
+                [$code, $contentType, $type] = explode(" ", $customPHPDocNode->value, 3);
+                $statusCode = (int) $code;
+
+                $response = new OpenAPIResponse($statusCode);
+                $response->description = ResponseCodeDescription($statusCode);
+                $response->contentType = $contentType;
+
+                $schema = new OpenAPISchemaTyped("string");
+                $schema->format = $type;
+
+                $response->setSchema($schema);
+                $this->addResponse($response);
+            }
+        }
     }
 
     private function addResponse(OpenAPIResponse $response)
     {
-        $this->responses["$response->code"] = $response;
+        $this->responses[] = $response;
     }
 
     public function jsonSerialize(): array
@@ -135,14 +153,26 @@ class OpenAPIPath implements JsonSerializable
             "operationId" => $this->operationId,
         ];
 
-        if ($this->parameters) {
+        if ($this->parameters)
             $result["parameters"] = $this->parameters;
-        }
-        if ($this->requestBody) {
+
+        if ($this->requestBody)
             $result["requestBody"] = $this->requestBody;
-        }
+
         if ($this->responses) {
-            $result["responses"] = $this->responses;
+            $result["responses"] = [];
+            foreach ($this->responses as $response) {
+                $code = (string) $response->code;
+                $result["responses"][$code] ??= [];
+                if ($response->description)
+                    $result["responses"][$code]["description"] = $response->description;
+
+                if ($schema = $response->getSchema()) {
+                    foreach (OpenAPIDocument::getInstance()->contentTypes as $contentType) {
+                        $result["responses"][$code]["content"][$response->contentType ?? $contentType]["schema"] = $schema;
+                    }
+                }
+            }
         }
 
         return $result;
