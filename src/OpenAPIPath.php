@@ -127,6 +127,7 @@ class OpenAPIPath implements JsonSerializable
             if ($customPHPDocNode->tagName === "@OpenAPICustomResponse") {
                 [$code, $contentType, $type] = explode(" ", $customPHPDocNode->value, 3);
                 $statusCode = (int) $code;
+                $contentType = str_replace("\/", "/", $contentType);
 
                 $response = new OpenAPIResponse($statusCode);
                 $response->description = ResponseCodeDescription($statusCode);
