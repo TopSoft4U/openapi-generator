@@ -109,6 +109,9 @@ class OpenAPIPath implements JsonSerializable
                 continue;
             }
 
+            if ($ex->getCode() < 100)
+                continue;
+
             $schema = OpenAPIBaseSchema::ExtractFromTypeName($excClassName);
             $error = new OpenAPIResponse($ex->getCode());
             $error->description = $throw->description ?? ResponseCodeDescription($ex->getCode());
