@@ -92,6 +92,10 @@ class OpenAPIDocument implements JsonSerializable
                     continue;
                 }
 
+                if ($method->isConstructor() || $method->isDestructor()) {
+                    continue;
+                }
+
                 if ($method->isStatic()) {
                     continue;
                 }
