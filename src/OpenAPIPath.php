@@ -104,6 +104,13 @@ class OpenAPIPath implements JsonSerializable
                 continue;
             }
 
+            if (!$excClass->isInstantiable())
+                continue;
+
+            // Not supported constructor type
+            if (!$excClass->getConstructor() || $excClass->getConstructor()->getNumberOfRequiredParameters() > 0)
+                continue;
+
             $ex = $excClass->newInstance();
             if (!assert($ex instanceof Throwable)) {
                 continue;
