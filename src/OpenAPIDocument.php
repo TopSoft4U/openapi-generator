@@ -28,6 +28,8 @@ class OpenAPIDocument implements JsonSerializable
     /** @var OpenAPIGenericError[] */
     public array $genericErrors = [];
 
+    public ?string $beforeActionSuffix = null;
+
     private string $controllerDir;
     private string $modelDir;
 
@@ -97,6 +99,11 @@ class OpenAPIDocument implements JsonSerializable
                 }
 
                 if ($method->isStatic()) {
+                    continue;
+                }
+
+                // Skip methods that are beforeAction handlers (if set)
+                if ($this->beforeActionSuffix && str_ends_with($method->name, $this->beforeActionSuffix)) {
                     continue;
                 }
 

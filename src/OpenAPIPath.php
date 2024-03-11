@@ -45,6 +45,9 @@ class OpenAPIPath implements JsonSerializable
         $this->operationId = "$requestType$this->uri";
         $this->tags = [$group];
 
+        // Check if method has any beforeAction
+        $this->parseBeforeActionMethod($method);
+
         $this->extractParams($method->getParameters());
         $this->extractResponses($method);
     }
@@ -96,35 +99,7 @@ class OpenAPIPath implements JsonSerializable
             $this->addResponse($response);
         }
 
-        foreach ($docs->throws as $throw) {
-            $excClassName = $throw->type;
-
-            $excClass = new ReflectionClass($excClassName);
-            if (!in_array("Throwable", $excClass->getInterfaceNames())) {
-                continue;
-            }
-
-            if (!$excClass->isInstantiable())
-                continue;
-
-            // Not supported constructor type
-            if (!$excClass->getConstructor() || $excClass->getConstructor()->getNumberOfRequiredParameters() > 0)
-                continue;
-
-            $ex = $excClass->newInstance();
-            if (!assert($ex instanceof Throwable)) {
-                continue;
-            }
-
-            if ($ex->getCode() < 100)
-                continue;
-
-            $schema = OpenAPIBaseSchema::ExtractFromTypeName($excClassName);
-            $error = new OpenAPIResponse($ex->getCode());
-            $error->description = $throw->description ?? ResponseCodeDescription($ex->getCode());
-            $error->setSchema($schema);
-            $this->addResponse($error);
-        }
+        $this->extractExceptions($docs);
 
         foreach (OpenAPIDocument::getInstance()->genericErrors as $genericError) {
             $error = new OpenAPIResponse($genericError->code);
@@ -154,6 +129,12 @@ class OpenAPIPath implements JsonSerializable
 
     private function addResponse(OpenAPIResponse $response)
     {
+        // Don't add duplicate responses
+        foreach ($this->responses as $r) {
+            if ($r->code == $response->code)
+                return;
+        }
+
         $this->responses[] = $response;
     }
 
@@ -187,5 +168,59 @@ class OpenAPIPath implements JsonSerializable
         }
 
         return $result;
+    }
+
+    public function extractExceptions(\TopSoft4U\PhpDocParser\PHPDocResult $docs): void
+    {
+        foreach ($docs->throws as $throw) {
+            $excClassName = $throw->type;
+
+            $excClass = new ReflectionClass($excClassName);
+            if (!in_array("Throwable", $excClass->getInterfaceNames()))
+                continue;
+
+            if (!$excClass->isInstantiable())
+                continue;
+
+            // Not supported constructor type
+            if (!$excClass->getConstructor() || $excClass->getConstructor()->getNumberOfRequiredParameters() > 0)
+                continue;
+
+            $ex = $excClass->newInstance();
+            if (!assert($ex instanceof Throwable)) {
+                continue;
+            }
+
+            if ($ex->getCode() < 100)
+                continue;
+
+            $excSchema = OpenAPIBaseSchema::ExtractFromTypeName($excClassName);
+            $exc = new OpenAPIResponse($ex->getCode());
+            $exc->description = $throw->description ?? ResponseCodeDescription($ex->getCode());
+            $exc->setSchema($excSchema);
+            $this->addResponse($exc);
+        }
+    }
+
+    /**
+     * Parses the before action method, if it exists, and extracts any documented exceptions.
+     */
+    public function parseBeforeActionMethod(ReflectionMethod $method): void
+    {
+        $openAPIDocument = OpenAPIDocument::getInstance();
+        if (!$openAPIDocument->beforeActionSuffix)
+            return;
+
+        $beforeActionMethod = $method->name . $openAPIDocument->beforeActionSuffix;
+        $methodClass = $method->class;
+
+        if (!method_exists($methodClass, $beforeActionMethod))
+            return;
+
+        $beforeMethod = new ReflectionMethod($methodClass, $beforeActionMethod);
+        $docString = $beforeMethod->getDocComment();
+        $docs = PHPParseDoc($docString);
+
+        $this->extractExceptions($docs);
     }
 }
