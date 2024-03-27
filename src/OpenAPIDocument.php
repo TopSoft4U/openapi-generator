@@ -30,8 +30,17 @@ class OpenAPIDocument implements JsonSerializable
 
     public ?string $beforeActionSuffix = null;
 
+    /**
+     * @var callable(ReflectionMethod $method): string
+     */
+    public $overridePathUri = null;
+    /**
+     * @var callable(ReflectionMethod $method): string
+     */
+    public $overrideOperationId = null;
+    // public ?OpenAPIXMLSettings $xmlSettings = null;
+
     private string $controllerDir;
-    private string $modelDir;
 
     private array $paths = [];
     private array $components = [];
@@ -61,10 +70,9 @@ class OpenAPIDocument implements JsonSerializable
     {
     }
 
-    public function setDirectories(string $contDir, string $modelDir)
+    public function setDirectories(string $contDir)
     {
         $this->controllerDir = $contDir;
-        $this->modelDir = $modelDir;
     }
 
     /** @var ReflectionMethod[] */
@@ -138,7 +146,7 @@ class OpenAPIDocument implements JsonSerializable
      */
     public function process()
     {
-        if (!$this->controllerDir || !$this->modelDir) {
+        if (!$this->controllerDir) {
             throw new Exception("Please set paths before parsing");
         }
 

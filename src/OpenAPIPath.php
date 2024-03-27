@@ -15,6 +15,7 @@ class OpenAPIPath implements JsonSerializable
 {
     public string $requestType;
     public string $uri;
+    public ?string $description = null;
 
     private string $operationId;
 
@@ -38,11 +39,21 @@ class OpenAPIPath implements JsonSerializable
         $group = str_replace("Controller", "", $controller);
 
         [$requestType, $action] = explode("_", $method->name, 2);
-
         $this->requestType = $requestType;
-        $this->uri = "/$group/$action";
 
-        $this->operationId = "$requestType$this->uri";
+        $openApiDocument = OpenAPIDocument::getInstance();
+        if ($openApiDocument->overridePathUri) {
+            $func = $openApiDocument->overridePathUri;
+            $this->uri = $func($method);
+        } else
+            $this->uri = "/$group/$action";
+
+        if ($openApiDocument->overrideOperationId) {
+            $func = $openApiDocument->overrideOperationId;
+            $this->operationId = $func($method);
+        } else
+            $this->operationId = "$requestType$this->uri";
+
         $this->tags = [$group];
 
         // Check if method has any beforeAction
@@ -54,6 +65,7 @@ class OpenAPIPath implements JsonSerializable
 
     /**
      * @param \ReflectionParameter[] $parameters
+     *
      * @throws \Exception
      */
     private function extractParams(array $parameters)
@@ -74,6 +86,8 @@ class OpenAPIPath implements JsonSerializable
     private function extractResponses(ReflectionMethod $method)
     {
         $docs = PHPParseDoc($method->getDocComment());
+        $this->description = $docs->description;
+
         $returnType = $method->getReturnType();
 
         $statusCode = 200;
@@ -111,7 +125,7 @@ class OpenAPIPath implements JsonSerializable
         foreach ($docs->custom as $customPHPDocNode) {
             if ($customPHPDocNode->tagName === "@OpenAPICustomResponse") {
                 [$code, $contentType, $type] = explode(" ", $customPHPDocNode->value, 3);
-                $statusCode = (int) $code;
+                $statusCode = (int)$code;
                 $contentType = str_replace("\/", "/", $contentType);
 
                 $response = new OpenAPIResponse($statusCode);
@@ -151,10 +165,13 @@ class OpenAPIPath implements JsonSerializable
         if ($this->requestBody)
             $result["requestBody"] = $this->requestBody;
 
+        if ($this->description)
+            $result["description"] = $this->description;
+
         if ($this->responses) {
             $result["responses"] = [];
             foreach ($this->responses as $response) {
-                $code = (string) $response->code;
+                $code = (string)$response->code;
                 $result["responses"][$code] ??= [];
                 if ($response->description)
                     $result["responses"][$code]["description"] = $response->description;
@@ -162,6 +179,8 @@ class OpenAPIPath implements JsonSerializable
                 if ($schema = $response->getSchema()) {
                     foreach (OpenAPIDocument::getInstance()->contentTypes as $contentType) {
                         $result["responses"][$code]["content"][$response->contentType ?? $contentType]["schema"] = $schema;
+                        $contentType = $response->contentType ?? $contentType;
+                        $result["responses"][$code]["content"][$contentType]["schema"] = $schema;
                     }
                 }
             }

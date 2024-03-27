@@ -2,20 +2,19 @@
 
 namespace TopSoft4U\OpenAPI\Security;
 
-class OpenAPISecurityBearer extends OpenAPISecurity
+class OpenAPISecurityApiKey extends OpenAPISecurity
 {
-    public ?string $scheme = null;
+    public ?string $in = null;
 
     public function __construct()
     {
-        $this->type = "http";
-        $this->scheme = "bearer";
+        $this->type = "apiKey";
     }
 
     public function jsonSerialize(): array
     {
         $result = array_merge(parent::jsonSerialize(), [
-            "scheme" => $this->scheme,
+            "in" => $this->in,
         ]);
 
         return array_filter($result, function ($value) {
