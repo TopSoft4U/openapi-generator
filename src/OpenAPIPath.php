@@ -178,7 +178,6 @@ class OpenAPIPath implements JsonSerializable
 
                 if ($schema = $response->getSchema()) {
                     foreach (OpenAPIDocument::getInstance()->contentTypes as $contentType) {
-                        $result["responses"][$code]["content"][$response->contentType ?? $contentType]["schema"] = $schema;
                         $contentType = $response->contentType ?? $contentType;
                         $result["responses"][$code]["content"][$contentType]["schema"] = $schema;
                     }
