@@ -41,17 +41,15 @@ class OpenAPIPath implements JsonSerializable
         [$requestType, $action] = explode("_", $method->name, 2);
         $this->requestType = $requestType;
 
-        $openApiDocument = OpenAPIDocument::getInstance();
-        if ($openApiDocument->overridePathUri) {
-            $func = $openApiDocument->overridePathUri;
+        $overrides = OpenAPIOverrides::getInstance();
+        if ($func = $overrides->overridePathUri)
             $this->uri = $func($method);
-        } else
+        else
             $this->uri = "/$group/$action";
 
-        if ($openApiDocument->overrideOperationId) {
-            $func = $openApiDocument->overrideOperationId;
+        if ($func = $overrides->overrideOperationId)
             $this->operationId = $func($method);
-        } else
+        else
             $this->operationId = "$requestType$this->uri";
 
         $this->tags = [$group];

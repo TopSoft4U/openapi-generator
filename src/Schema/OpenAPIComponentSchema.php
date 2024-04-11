@@ -6,6 +6,7 @@ use TopSoft4U\OpenAPI\OpenAPIDocument;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
+use TopSoft4U\OpenAPI\OpenAPIOverrides;
 
 class OpenAPIComponentSchema extends OpenAPISchemaTyped
 {
@@ -114,7 +115,18 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
             $result["description"] = $this->description;
         }
         if ($this->properties) {
-            $result["properties"] = $this->properties;
+            $overrides = OpenAPIOverrides::getInstance();
+            if ($func = $overrides->overridePropertyKey) {
+                // $this->properties is array of string key and OpenAPISchemaTyped value
+                // replace the key with the overridden key and replace it in the result
+                $properties = [];
+                foreach ($this->properties as $key => $value) {
+                    $properties[$func($key)] = $value;
+                }
+                $result["properties"] = $properties;
+            } else {
+                $result["properties"] = $this->properties;
+            }
         }
         if ($this->required) {
             $result["required"] = $this->required;

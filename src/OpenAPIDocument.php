@@ -30,16 +30,6 @@ class OpenAPIDocument implements JsonSerializable
 
     public ?string $beforeActionSuffix = null;
 
-    /**
-     * @var callable(ReflectionMethod $method): string
-     */
-    public $overridePathUri = null;
-    /**
-     * @var callable(ReflectionMethod $method): string
-     */
-    public $overrideOperationId = null;
-    // public ?OpenAPIXMLSettings $xmlSettings = null;
-
     private string $controllerDir;
 
     private array $paths = [];
@@ -48,7 +38,7 @@ class OpenAPIDocument implements JsonSerializable
     /** @var \TopSoft4U\OpenAPI\Schema\OpenAPIComponentSchema[] */
     private array $schemas = [];
 
-    public static function getInstance(): OpenAPIDocument
+    public static function getInstance(): self
     {
         if (!self::$instance) {
             self::$instance = new static();
