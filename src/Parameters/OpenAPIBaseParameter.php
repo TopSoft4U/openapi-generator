@@ -28,7 +28,7 @@ abstract class OpenAPIBaseParameter implements JsonSerializable
         $this->description = $paramDoc->description ?? null;
         $this->required = !$parameter->allowsNull();
 
-        $this->schema = OpenAPIBaseSchema::ExtractFromType($parameter->getType(), $paramDoc->type ?? null);
+        $this->schema = OpenAPIBaseSchema::ExtractFromType($parameter->getType(), $paramDoc->type ?? null, $paramDoc->genericArgs ?? []);
 
         if ($parameter->isOptional()) {
             $this->schema->default = $parameter->getDefaultValue();
