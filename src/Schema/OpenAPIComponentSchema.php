@@ -84,9 +84,12 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
             $docs = PHPParseDoc($prop->getDocComment());
             $newProp = OpenAPIBaseSchema::ExtractFromType($propType, $docs->var->type ?? null, $docs->var->genericArgs ?? []);
 
-            $propDocParse = PHPParseDoc($prop->getDocComment());
-            if (isset($propDocParse->description)) {
-                $newProp->description = $propDocParse->description;
+            if (isset($docs->description)) {
+                $newProp->description = $docs->description;
+            }
+
+            if ($docs->deprecated) {
+                $newProp->deprecated = true;
             }
 
             if (!$propType->allowsNull()) {

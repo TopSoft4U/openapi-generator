@@ -11,6 +11,7 @@ abstract class OpenAPIBaseSchema implements JsonSerializable
     public string $name;
     public ?string $description = null;
     public $default = null;
+    protected bool $deprecated = false;
     public ?int $minimum;
 
     public function __construct(string $typeName)

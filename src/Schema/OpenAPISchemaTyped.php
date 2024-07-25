@@ -120,6 +120,10 @@ class OpenAPISchemaTyped extends OpenAPIBaseSchema
             $result["default"] = $this->default;
         }
 
+        if ($this->deprecated) {
+            $result["deprecated"] = $this->deprecated;
+        }
+
         if (isset($this->additionalProperties)) {
             $result["additionalProperties"] = $this->additionalProperties;
         }
