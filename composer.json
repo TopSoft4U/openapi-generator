@@ -12,7 +12,6 @@
   "license": "MIT",
   "autoload": {
     "files": [
-      "src/polyfill.php",
       "src/utils.php"
     ],
     "psr-4": {
