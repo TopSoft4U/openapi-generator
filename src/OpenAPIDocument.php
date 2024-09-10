@@ -171,6 +171,7 @@ class OpenAPIDocument implements JsonSerializable
         ];
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = [

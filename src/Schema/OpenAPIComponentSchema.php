@@ -110,6 +110,7 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
         }
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = parent::jsonSerialize();

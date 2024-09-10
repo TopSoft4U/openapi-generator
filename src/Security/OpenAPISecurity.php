@@ -10,6 +10,7 @@ abstract class OpenAPISecurity implements JsonSerializable
     public ?string $type = null;
     public ?string $name = null;
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = [
@@ -18,8 +19,6 @@ abstract class OpenAPISecurity implements JsonSerializable
             "description" => $this->description,
         ];
 
-        return array_filter($result, function ($value) {
-            return $value !== null;
-        });
+        return array_filter($result, fn($value) => $value !== null);
     }
 }

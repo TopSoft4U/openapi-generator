@@ -8,15 +8,12 @@ use TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema;
 class OpenAPIResponse
 {
     public ?string $contentType = null;
-
-    public int $code;
     public string $description;
 
     private ?OpenAPIBaseSchema $schema = null;
 
-    public function __construct(int $code)
+    public function __construct(public int $code)
     {
-        $this->code = $code;
     }
 
     public function getSchema(): ?OpenAPIBaseSchema

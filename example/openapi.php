@@ -28,5 +28,5 @@ if (isset($_GET["with_inheritance"])) {
 
 $openApi->genericErrors[] = new OpenAPIGenericError(400, Error400::class);
 
-$openApi->setDirectories(__DIR__ . DIRECTORY_SEPARATOR . "Controllers", __DIR__ . DIRECTORY_SEPARATOR . "Models");
+$openApi->setDirectories(__DIR__ . DIRECTORY_SEPARATOR . "Controllers");
 $openApi->process();

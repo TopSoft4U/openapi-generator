@@ -7,13 +7,11 @@ use TopSoft4U\OpenAPI\Schema\OpenAPIBaseSchema;
 
 class OpenAPIContent implements JsonSerializable
 {
-    public OpenAPIBaseSchema $schema;
-
-    public function __construct(OpenAPIBaseSchema $schema)
+    public function __construct(public OpenAPIBaseSchema $schema)
     {
-        $this->schema = $schema;
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = [];

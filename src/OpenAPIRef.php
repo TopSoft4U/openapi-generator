@@ -6,13 +6,11 @@ use JsonSerializable;
 
 class OpenAPIRef implements JsonSerializable
 {
-    private string $name;
-
-    public function __construct($name)
+    public function __construct(private readonly string $name)
     {
-        $this->name = $name;
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         return [

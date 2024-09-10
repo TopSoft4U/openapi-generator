@@ -16,6 +16,7 @@ class OpenAPIBodyParameter extends OpenAPIBaseParameter
         $this->content = new OpenAPIContent($this->schema);
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = [

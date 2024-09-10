@@ -12,14 +12,13 @@ class OpenAPISecurityBearer extends OpenAPISecurity
         $this->scheme = "bearer";
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = array_merge(parent::jsonSerialize(), [
             "scheme" => $this->scheme,
         ]);
 
-        return array_filter($result, function ($value) {
-            return $value !== null;
-        });
+        return array_filter($result, fn($value) => $value !== null);
     }
 }

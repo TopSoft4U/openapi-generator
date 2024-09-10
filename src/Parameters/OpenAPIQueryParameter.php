@@ -34,6 +34,7 @@ class OpenAPIQueryParameter extends OpenAPIBaseParameter
         }
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = array_merge(parent::jsonSerialize(), [

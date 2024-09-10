@@ -35,6 +35,7 @@ abstract class OpenAPIBaseParameter implements JsonSerializable
         }
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = [

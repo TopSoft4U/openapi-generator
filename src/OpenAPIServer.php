@@ -6,15 +6,11 @@ use JsonSerializable;
 
 class OpenAPIServer implements JsonSerializable
 {
-    public string $url;
-    public ?string $description = null;
-
-    public function __construct(string $url, ?string $description = null)
+    public function __construct(public string $url, public ?string $description = null)
     {
-        $this->url = $url;
-        $this->description = $description;
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $output = ["url" => $this->url];

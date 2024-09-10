@@ -19,7 +19,7 @@ class OpenAPIPath implements JsonSerializable
 
     private string $operationId;
 
-    private array $tags;
+    private readonly array $tags;
 
 
     /** @var OpenAPIResponse[] */
@@ -150,6 +150,7 @@ class OpenAPIPath implements JsonSerializable
         $this->responses[] = $response;
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = [

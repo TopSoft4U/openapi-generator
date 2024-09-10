@@ -99,6 +99,7 @@ class OpenAPISchemaTyped extends OpenAPIBaseSchema
         }
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = ["type" => $this->type];

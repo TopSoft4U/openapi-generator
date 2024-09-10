@@ -1,6 +1,6 @@
 {
   "name": "topsoft4u/openapi-generator",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "homepage": "https://topsoft4u.com",
   "keywords": [
     "openapi",
@@ -27,7 +27,7 @@
     }
   ],
   "require": {
-    "php": ">=7.4",
+    "php": ">=8.3",
     "topsoft4u/php-doc-parser": ">=1.0.8",
     "ext-json": "*",
     "ext-mbstring": "*"

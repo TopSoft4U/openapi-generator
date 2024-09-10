@@ -11,14 +11,13 @@ class OpenAPISecurityApiKey extends OpenAPISecurity
         $this->type = "apiKey";
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         $result = array_merge(parent::jsonSerialize(), [
             "in" => $this->in,
         ]);
 
-        return array_filter($result, function ($value) {
-            return $value !== null;
-        });
+        return array_filter($result, fn($value) => $value !== null);
     }
 }

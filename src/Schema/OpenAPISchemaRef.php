@@ -25,6 +25,7 @@ class OpenAPISchemaRef extends OpenAPIBaseSchema
         OpenAPIDocument::getInstance()->registerSchema($schemaDefinition);
     }
 
+    #[\Override]
     public function jsonSerialize(): array
     {
         return ["\$ref" => "#/components/schemas/$this->name"];
