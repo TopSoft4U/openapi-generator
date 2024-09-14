@@ -60,7 +60,7 @@ class OpenAPIDocument implements JsonSerializable
     {
     }
 
-    public function setDirectories(string $contDir)
+    public function setDirectories(string $contDir): void
     {
         $this->controllerDir = $contDir;
     }
@@ -71,7 +71,7 @@ class OpenAPIDocument implements JsonSerializable
     /**
      * @throws \ReflectionException
      */
-    private function parseControllers()
+    private function parseControllers(): void
     {
         $this->routes = [];
 
@@ -113,7 +113,7 @@ class OpenAPIDocument implements JsonSerializable
     /**
      * @throws \Exception
      */
-    private function generatePaths()
+    private function generatePaths(): void
     {
         foreach ($this->routes as $route) {
             $path = new OpenAPIPath($route);
@@ -126,7 +126,7 @@ class OpenAPIDocument implements JsonSerializable
         return $this->schemas[$name] ?? null;
     }
 
-    public function registerSchema(OpenAPIComponentSchema $schema)
+    public function registerSchema(OpenAPIComponentSchema $schema): void
     {
         $this->schemas[$schema->name] = $schema;
     }
@@ -134,7 +134,7 @@ class OpenAPIDocument implements JsonSerializable
     /**
      * @throws \Exception
      */
-    public function process()
+    public function process(): void
     {
         if (!$this->controllerDir) {
             throw new Exception("Please set paths before parsing");
@@ -154,7 +154,7 @@ class OpenAPIDocument implements JsonSerializable
     /** @var OpenAPIServer[] */
     private array $servers = [];
 
-    public function addServer(OpenAPIServer $server)
+    public function addServer(OpenAPIServer $server): void
     {
         $this->servers[] = $server;
     }
@@ -162,7 +162,7 @@ class OpenAPIDocument implements JsonSerializable
     private array $security = [];
     private array $securitySchemes = [];
 
-    public function addSecurity(string $name, OpenAPISecurity $security)
+    public function addSecurity(string $name, OpenAPISecurity $security): void
     {
         $this->securitySchemes[$name] = $security;
         $this->components["securitySchemes"][$name] = $security;

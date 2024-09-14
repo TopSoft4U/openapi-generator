@@ -66,7 +66,7 @@ class OpenAPIPath implements JsonSerializable
      *
      * @throws \Exception
      */
-    private function extractParams(array $parameters)
+    private function extractParams(array $parameters): void
     {
         foreach ($parameters as $pInfo) {
             if ($pInfo->name == OpenAPIDocument::$requestBodyKey) {
@@ -81,7 +81,7 @@ class OpenAPIPath implements JsonSerializable
     /**
      * @throws \ReflectionException
      */
-    private function extractResponses(ReflectionMethod $method)
+    private function extractResponses(ReflectionMethod $method): void
     {
         $docs = PHPParseDoc($method->getDocComment());
         $this->description = $docs->description;
@@ -139,7 +139,7 @@ class OpenAPIPath implements JsonSerializable
         }
     }
 
-    private function addResponse(OpenAPIResponse $response)
+    private function addResponse(OpenAPIResponse $response): void
     {
         // Don't add duplicate responses
         foreach ($this->responses as $r) {
