@@ -69,6 +69,9 @@ class OpenAPIDocument implements JsonSerializable
     private array $routes = [];
 
     /**
+     * Parse controllers and return list of methods for route generation
+     * Uses PHP tokenizer instead of loading classes for safety
+     *
      * @throws \ReflectionException
      */
     private function parseControllers(): void
@@ -77,9 +80,20 @@ class OpenAPIDocument implements JsonSerializable
 
         $files = glob("$this->controllerDir" . DIRECTORY_SEPARATOR . "*.php");
         foreach ($files as $file) {
-            include($file);
-            $classes = get_declared_classes();
-            $className = end($classes);
+            $className = $this->extractClassNameFromFile($file);
+            if (!$className) {
+                continue;
+            }
+
+            // Load class only if not already loaded
+            if (!class_exists($className, false)) {
+                require_once $file;
+            }
+
+            // Check if class exists after loading
+            if (!class_exists($className)) {
+                continue;
+            }
 
             $class = new ReflectionClass($className);
             if ($class->isAbstract()) {
@@ -100,7 +114,7 @@ class OpenAPIDocument implements JsonSerializable
                     continue;
                 }
 
-                // Skip methods that are beforeAction handlers (if set)
+                // Skip beforeAction handler methods (if configured)
                 if ($this->beforeActionSuffix && str_ends_with($method->name, $this->beforeActionSuffix)) {
                     continue;
                 }
@@ -108,6 +122,89 @@ class OpenAPIDocument implements JsonSerializable
                 $this->routes[] = $method;
             }
         }
+    }
+
+    /**
+     * Extract class name from PHP file using tokenizer
+     * Safe - does not execute code
+     *
+     * @param string $file Path to PHP file
+     * @return string|null Fully qualified class name with namespace or null
+     */
+    private function extractClassNameFromFile(string $file): ?string
+    {
+        $content = file_get_contents($file);
+        if ($content === false) {
+            return null;
+        }
+
+        $tokens = token_get_all($content);
+
+        $namespace = '';
+        $className = null;
+        $inNamespace = false;
+        $namespaceBuffer = [];
+
+        for ($i = 0, $count = count($tokens); $i < $count; $i++) {
+            $token = $tokens[$i];
+
+            // Array token: [type, value, line]
+            if (is_array($token)) {
+                list($type, $value) = $token;
+
+                // Find namespace
+                if ($type === T_NAMESPACE) {
+                    $inNamespace = true;
+                    $namespaceBuffer = [];
+                    continue;
+                }
+
+                // Collect namespace elements
+                if ($inNamespace) {
+                    if ($type === T_NAME_QUALIFIED || $type === T_STRING) {
+                        $namespaceBuffer[] = $value;
+                    } elseif ($type === T_NS_SEPARATOR) {
+                        // Continue collecting
+                    } elseif ($token === ';') {
+                        $inNamespace = false;
+                        $namespace = implode('\\', $namespaceBuffer);
+                        $namespaceBuffer = [];
+                    }
+                    continue;
+                }
+
+                // Find class/interface/trait
+                if ($type === T_CLASS || $type === T_INTERFACE || $type === T_TRAIT) {
+                    // Check if next token is class name
+                    for ($j = $i + 1; $j < $count; $j++) {
+                        $nextToken = $tokens[$j];
+
+                        if (is_array($nextToken)) {
+                            if ($nextToken[0] === T_STRING) {
+                                $className = $nextToken[1];
+                                break;
+                            }
+                        } elseif ($nextToken === '{') {
+                            // End of class declaration without name (e.g. anonymous class)
+                            break;
+                        }
+                    }
+
+                    if ($className) {
+                        return $namespace ? $namespace . '\\' . $className : $className;
+                    }
+                }
+            } else {
+                // Single token (e.g. ';', '{', '}')
+                if ($inNamespace && $token === ';') {
+                    $inNamespace = false;
+                    $namespace = implode('\\', $namespaceBuffer);
+                    $namespaceBuffer = [];
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
