@@ -92,7 +92,7 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
                 $newProp->deprecated = true;
             }
 
-            if (!$propType->allowsNull()) {
+            if (!$propType->allowsNull() && !$prop->hasDefaultValue()) {
                 $this->required[] = $prop->name;
             }
 
