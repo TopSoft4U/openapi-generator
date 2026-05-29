@@ -82,7 +82,34 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
             }
 
             $docs = PHPParseDoc($prop->getDocComment());
-            $newProp = OpenAPIBaseSchema::ExtractFromType($propType, $docs->var->type ?? null, $docs->var->genericArgs ?? []);
+            $extraType = $docs->var->type ?? null;
+
+            if ($extraType !== null) {
+                $declaringClass = $prop->class === $class->name
+                    ? $class
+                    : new ReflectionClass($prop->class);
+                $templates = $this->getTemplates($declaringClass);
+
+                $stripped = $extraType;
+                if (str_ends_with($stripped, "[]")) {
+                    $stripped = mb_substr($stripped, 0, -2);
+                }
+                if (array_key_exists($stripped, $templates)) {
+                    $resolved = $this->resolveTemplateParam($class, $declaringClass, $stripped, $templates[$stripped]);
+                    $extraType = str_ends_with($extraType, "[]")
+                        ? $resolved . "[]"
+                        : $resolved;
+                } elseif (!IsBuiltin($stripped)) {
+                    $resolved = ResolveClassName($declaringClass, $stripped);
+                    if ($resolved !== $stripped) {
+                        $extraType = str_ends_with($extraType, "[]")
+                            ? $resolved . "[]"
+                            : $resolved;
+                    }
+                }
+            }
+
+            $newProp = OpenAPIBaseSchema::ExtractFromType($propType, $extraType, $docs->var->genericArgs ?? []);
 
             if (isset($docs->description)) {
                 $newProp->description = $docs->description;
@@ -108,6 +135,87 @@ class OpenAPIComponentSchema extends OpenAPISchemaTyped
                 $this->properties[$key]->default = $value;
             }
         }
+    }
+
+    private function getTemplates(ReflectionClass $class): array
+    {
+        static $cache = [];
+        $className = $class->getName();
+        if (isset($cache[$className])) {
+            return $cache[$className];
+        }
+
+        $classDocs = PHPParseDoc($class->getDocComment());
+        $templates = [];
+        foreach ($classDocs->templates as $template) {
+            $templates[$template->name] = $template->bound;
+        }
+
+        return $cache[$className] = $templates;
+    }
+
+    private function getExtendsMapping(ReflectionClass $childClass, ReflectionClass $declaringClass): array
+    {
+        static $cache = [];
+        $cacheKey = $childClass->getName() . "::" . $declaringClass->getName();
+        if (isset($cache[$cacheKey])) {
+            return $cache[$cacheKey];
+        }
+
+        $childDocs = PHPParseDoc($childClass->getDocComment());
+        $declaringShortName = (new ReflectionClass($declaringClass->getName()))->getShortName();
+        $declaringFqcn = $declaringClass->getName();
+
+        $matchedExtends = null;
+        foreach ($childDocs->extends as $extendsNode) {
+            $parentClass = $extendsNode->parentClass;
+            if ($parentClass === $declaringShortName || ltrim($parentClass, "\\") === ltrim($declaringFqcn, "\\")) {
+                $matchedExtends = $extendsNode;
+                break;
+            }
+            $resolvedParent = ResolveClassName($childClass, $parentClass);
+            if (ltrim($resolvedParent, "\\") === ltrim($declaringFqcn, "\\")) {
+                $matchedExtends = $extendsNode;
+                break;
+            }
+        }
+
+        if (!$matchedExtends || !$matchedExtends->genericArgs) {
+            return $cache[$cacheKey] = [];
+        }
+
+        $parentTemplates = $this->getTemplates($declaringClass);
+        $templateNames = array_keys($parentTemplates);
+        $mapping = [];
+        foreach ($matchedExtends->genericArgs as $i => $argType) {
+            if (isset($templateNames[$i])) {
+                $mapping[$templateNames[$i]] = $argType;
+            }
+        }
+
+        return $cache[$cacheKey] = $mapping;
+    }
+
+    private function resolveTemplateParam(ReflectionClass $class, ReflectionClass $declaringClass, string $paramName, ?string $bound): string
+    {
+        $extendsMapping = $this->getExtendsMapping($class, $declaringClass);
+        if (array_key_exists($paramName, $extendsMapping)) {
+            $resolved = ResolveClassName($class, $extendsMapping[$paramName]);
+            if (class_exists($resolved) || interface_exists($resolved)) {
+                return $resolved;
+            }
+            return $resolved;
+        }
+
+        if ($bound !== null) {
+            $resolved = ResolveClassName($declaringClass, $bound);
+            if (class_exists($resolved) || interface_exists($resolved)) {
+                return $resolved;
+            }
+            return $resolved;
+        }
+
+        return "mixed";
     }
 
     #[\Override]

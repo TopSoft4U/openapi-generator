@@ -85,12 +85,10 @@ class OpenAPIDocument implements JsonSerializable
                 continue;
             }
 
-            // Load class only if not already loaded
             if (!class_exists($className, false)) {
                 require_once $file;
             }
 
-            // Check if class exists after loading
             if (!class_exists($className)) {
                 continue;
             }
@@ -114,7 +112,7 @@ class OpenAPIDocument implements JsonSerializable
                     continue;
                 }
 
-                // Skip beforeAction handler methods (if configured)
+
                 if ($this->beforeActionSuffix && str_ends_with($method->name, $this->beforeActionSuffix)) {
                     continue;
                 }
@@ -122,6 +120,75 @@ class OpenAPIDocument implements JsonSerializable
                 $this->routes[] = $method;
             }
         }
+    }
+
+    private function extractClassNameFromFile(string $file): ?string
+    {
+        $content = file_get_contents($file);
+        if ($content === false) {
+            return null;
+        }
+
+        $tokens = token_get_all($content);
+
+        $namespace = '';
+        $className = null;
+        $inNamespace = false;
+        $namespaceBuffer = [];
+
+        for ($i = 0, $count = count($tokens); $i < $count; $i++) {
+            $token = $tokens[$i];
+
+            if (is_array($token)) {
+                list($type, $value) = $token;
+
+                if ($type === T_NAMESPACE) {
+                    $inNamespace = true;
+                    $namespaceBuffer = [];
+                    continue;
+                }
+
+                if ($inNamespace) {
+                    if ($type === T_NAME_QUALIFIED || $type === T_STRING) {
+                        $namespaceBuffer[] = $value;
+                    } elseif ($type === T_NS_SEPARATOR) {
+                        // Continue collecting
+                    } elseif ($token === ';') {
+                        $inNamespace = false;
+                        $namespace = implode('\\', $namespaceBuffer);
+                        $namespaceBuffer = [];
+                    }
+                    continue;
+                }
+
+                if ($type === T_CLASS || $type === T_INTERFACE || $type === T_TRAIT) {
+                    for ($j = $i + 1; $j < $count; $j++) {
+                        $nextToken = $tokens[$j];
+
+                        if (is_array($nextToken)) {
+                            if ($nextToken[0] === T_STRING) {
+                                $className = $nextToken[1];
+                                break;
+                            }
+                        } elseif ($nextToken === '{') {
+                            break;
+                        }
+                    }
+
+                    if ($className) {
+                        return $namespace ? $namespace . '\\' . $className : $className;
+                    }
+                }
+            } else {
+                if ($inNamespace && $token === ';') {
+                    $inNamespace = false;
+                    $namespace = implode('\\', $namespaceBuffer);
+                    $namespaceBuffer = [];
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

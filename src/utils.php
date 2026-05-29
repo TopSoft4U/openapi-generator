@@ -14,6 +14,116 @@ function IsBuiltin(string $type): bool
     return in_array($type, ["string", "float", "bool", "boolean", "int", "integer", "null", "object", "iterable", "mixed", "array", "double"]);
 }
 
+function ResolveClassName(\ReflectionClass $context, string $name): string
+{
+    if ($name === "" || $name === "mixed" || $name === "null" || $name === "object" || str_starts_with($name, "?")) {
+        return $name;
+    }
+
+    if (str_starts_with($name, "\\")) {
+        return ltrim($name, "\\");
+    }
+
+    if (class_exists($name) || interface_exists($name)) {
+        return $name;
+    }
+
+    $imports = ResolveClassName_GetUseImports($context->getFileName());
+    if (isset($imports[$name])) {
+        return $imports[$name];
+    }
+
+    $firstPart = explode("\\", $name)[0];
+    if (isset($imports[$firstPart])) {
+        $resolved = $imports[$firstPart] . mb_substr($name, mb_strlen($firstPart));
+        if (class_exists($resolved) || interface_exists($resolved)) {
+            return $resolved;
+        }
+    }
+
+    $namespace = $context->getNamespaceName();
+    if ($namespace) {
+        $fqcn = $namespace . "\\" . $name;
+        if (class_exists($fqcn) || interface_exists($fqcn)) {
+            return $fqcn;
+        }
+    }
+
+    return $name;
+}
+
+function ResolveClassName_GetUseImports(?string $fileName): array
+{
+    static $cache = [];
+    if ($fileName === null) {
+        return [];
+    }
+    if (isset($cache[$fileName])) {
+        return $cache[$fileName];
+    }
+
+    $imports = [];
+    $content = file_get_contents($fileName);
+    if ($content === false) {
+        return $cache[$fileName] = [];
+    }
+
+    $tokens = token_get_all($content);
+    $inUse = false;
+    $useBuffer = [];
+    $useAlias = null;
+
+    for ($i = 0, $count = count($tokens); $i < $count; $i++) {
+        $token = $tokens[$i];
+
+        if (!is_array($token)) {
+            if ($token === ";" && $inUse) {
+                $fqn = implode("", $useBuffer);
+                if ($useAlias !== null) {
+                    $imports[$useAlias] = ltrim($fqn, "\\");
+                } else {
+                    $parts = explode("\\", $fqn);
+                    $imports[end($parts)] = ltrim($fqn, "\\");
+                }
+                $inUse = false;
+                $useBuffer = [];
+                $useAlias = null;
+            }
+            continue;
+        }
+
+        if ($token[0] === T_USE && !$inUse) {
+            $inUse = true;
+            $useBuffer = [];
+            $useAlias = null;
+            continue;
+        }
+
+        if (!$inUse) {
+            continue;
+        }
+
+        if ($token[0] === T_AS) {
+            $useAlias = "";
+            continue;
+        }
+
+        if ($token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED || $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR) {
+            if ($useAlias !== null && $token[0] === T_STRING) {
+                $useAlias = $token[1];
+            } else {
+                $useBuffer[] = $token[1];
+            }
+        }
+
+        if ($token[0] === T_CLASS || $token[0] === T_FUNCTION) {
+            break;
+        }
+    }
+
+    return $cache[$fileName] = $imports;
+}
+
 $codeMessages = [
     200 => "OK",
     204 => "Empty",
